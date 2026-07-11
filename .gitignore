@@ -226,3 +226,6 @@ __pycache__/
 
 # Local runtime data
 /apps/platform-api/data/
+
+# Generated ML model artifacts
+/apps/platform-api/app/ml/anomaly/artifacts/
