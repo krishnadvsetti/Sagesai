@@ -11,6 +11,7 @@ from app.api.v1.endpoints.company_secretary import (
 )
 from app.api.v1.endpoints.soc import router as soc_router
 from app.api.v1.endpoints.vision import router as vision_router
+from app.api.v1.endpoints.nlp import router as nlp_router
 
 api_router = APIRouter()
 
@@ -23,3 +24,4 @@ api_router.include_router(engineering_router)
 api_router.include_router(company_secretary_router)
 api_router.include_router(soc_router)
 api_router.include_router(vision_router)
+api_router.include_router(nlp_router)
