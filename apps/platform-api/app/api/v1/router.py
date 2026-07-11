@@ -9,6 +9,7 @@ from app.api.v1.endpoints.engineering import router as engineering_router
 from app.api.v1.endpoints.company_secretary import (
     router as company_secretary_router,
 )
+from app.api.v1.endpoints.soc import router as soc_router
 
 api_router = APIRouter()
 
@@ -19,3 +20,4 @@ api_router.include_router(ai_router)
 api_router.include_router(information_router)
 api_router.include_router(engineering_router)
 api_router.include_router(company_secretary_router)
+api_router.include_router(soc_router)
