@@ -13,7 +13,7 @@ async def admin_dashboard(
     ),
 ) -> dict[str, str]:
     return {
-        "message": "Welcome to the SagesAI administration dashboard",
+        "message": "Welcome to the Sagesai administration dashboard",
         "user": current_user.email,
         "role": current_user.role.value,
     }

@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    APP_NAME: str = "SagesAI"
+    APP_NAME: str = "Sagesai"
     APP_DESCRIPTION: str = (
         "Enterprise AI Platform for intelligent engineering, "
         "information management, corporate governance, and cybersecurity."
