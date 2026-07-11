@@ -229,3 +229,7 @@ __pycache__/
 
 # Generated ML model artifacts
 /apps/platform-api/app/ml/anomaly/artifacts/
+
+# Generated TensorFlow CV data and artifacts
+/apps/platform-api/app/ml/document_vision/data/generated/
+/apps/platform-api/app/ml/document_vision/artifacts/
