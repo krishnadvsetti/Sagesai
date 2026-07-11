@@ -27,6 +27,12 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 
+    # AI Gateway
+    GEMINI_API_KEY: str = ""
+    AI_MODEL: str = "gemini-2.5-flash"
+    AI_TEMPERATURE: float = 0.2
+    AI_MAX_OUTPUT_TOKENS: int = 2048
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
