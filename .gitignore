@@ -223,3 +223,6 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .ruff_cache/apps/platform-api/data/
+
+# Local runtime data
+/apps/platform-api/data/
