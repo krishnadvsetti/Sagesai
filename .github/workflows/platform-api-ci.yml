@@ -1,0 +1,50 @@
+name: Platform API CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/platform-api/**"
+      - ".github/workflows/platform-api-ci.yml"
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "apps/platform-api/**"
+      - ".github/workflows/platform-api-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Lint and Test
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: apps/platform-api
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: "apps/platform-api/uv.lock"
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --frozen --dev
+
+      - name: Run Ruff
+        run: uv run ruff check app tests
+
+      - name: Run tests
+        run: uv run pytest tests/ -v
