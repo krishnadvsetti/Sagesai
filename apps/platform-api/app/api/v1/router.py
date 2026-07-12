@@ -15,6 +15,11 @@ from app.api.v1.endpoints.nlp import router as nlp_router
 from app.api.v1.endpoints.evaluation import (
     router as evaluation_router,
 )
+from app.api.v1.endpoints.memory import router as memory_router
+from app.api.v1.endpoints.approval import router as approval_router
+from app.api.v1.endpoints.guardrails import (
+    router as guardrails_router,
+)
 
 api_router = APIRouter()
 
@@ -29,3 +34,6 @@ api_router.include_router(soc_router)
 api_router.include_router(vision_router)
 api_router.include_router(nlp_router)
 api_router.include_router(evaluation_router)
+api_router.include_router(memory_router)
+api_router.include_router(approval_router)
+api_router.include_router(guardrails_router)

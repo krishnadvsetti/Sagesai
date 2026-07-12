@@ -5,10 +5,15 @@ from app.models.user import User
 from app.schemas.engineering import (
     AgentRequest,
     AgentResponse,
+    AutoToolAgentRequest,
+    AutoToolAgentResponse,
     ProjectAnalysisRequest,
     ProjectAnalysisResponse,
+    ToolAgentRequest,
+    ToolAgentResponse,
 )
 from app.services.engineering.orchestrator import EngineeringOrchestrator
+
 
 router = APIRouter(
     prefix="/engineering",
@@ -16,7 +21,10 @@ router = APIRouter(
 )
 
 
-@router.post("/agent", response_model=AgentResponse)
+@router.post(
+    "/agent",
+    response_model=AgentResponse,
+)
 async def run_engineering_agent(
     payload: AgentRequest,
     current_user: User = Depends(get_current_user),
@@ -29,6 +37,44 @@ async def run_engineering_agent(
     )
 
     return AgentResponse(**result)
+
+
+@router.post(
+    "/agent-with-tool",
+    response_model=ToolAgentResponse,
+)
+async def run_engineering_agent_with_tool(
+    payload: ToolAgentRequest,
+    current_user: User = Depends(get_current_user),
+) -> ToolAgentResponse:
+    orchestrator = EngineeringOrchestrator()
+
+    result = await orchestrator.run_agent_with_tool(
+        agent_name=payload.agent,
+        task=payload.task,
+        tool_name=payload.tool,
+        tool_query=payload.tool_query,
+    )
+
+    return ToolAgentResponse(**result)
+
+
+@router.post(
+    "/agent-auto",
+    response_model=AutoToolAgentResponse,
+)
+async def run_engineering_agent_auto(
+    payload: AutoToolAgentRequest,
+    current_user: User = Depends(get_current_user),
+) -> AutoToolAgentResponse:
+    orchestrator = EngineeringOrchestrator()
+
+    result = await orchestrator.run_agent_auto(
+        agent_name=payload.agent,
+        task=payload.task,
+    )
+
+    return AutoToolAgentResponse(**result)
 
 
 @router.post(

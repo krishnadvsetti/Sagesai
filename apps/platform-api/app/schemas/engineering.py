@@ -9,10 +9,18 @@ AgentType = Literal[
     "code_review",
 ]
 
+ToolType = Literal[
+    "repository_search",
+    "document_search",
+]
+
 
 class AgentRequest(BaseModel):
     agent: AgentType
-    task: str = Field(min_length=1, max_length=20_000)
+    task: str = Field(
+        min_length=1,
+        max_length=20_000,
+    )
 
 
 class AgentResponse(BaseModel):
@@ -30,3 +38,38 @@ class ProjectAnalysisRequest(BaseModel):
 class ProjectAnalysisResponse(BaseModel):
     requirements: str
     architecture: str
+
+
+class ToolAgentRequest(BaseModel):
+    agent: AgentType
+    task: str = Field(
+        min_length=1,
+        max_length=20_000,
+    )
+    tool: ToolType
+    tool_query: str = Field(
+        min_length=1,
+        max_length=2000,
+    )
+
+
+class ToolAgentResponse(BaseModel):
+    agent: str
+    tool: str
+    tool_result: dict
+    result: str
+
+
+class AutoToolAgentRequest(BaseModel):
+    agent: AgentType
+    task: str = Field(
+        min_length=1,
+        max_length=20_000,
+    )
+
+
+class AutoToolAgentResponse(BaseModel):
+    agent: str
+    selected_tool: str
+    tool_result: dict | None
+    result: str

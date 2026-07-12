@@ -3,7 +3,13 @@ import tempfile
 import uuid
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    HTTPException,
+    UploadFile,
+)
 
 from app.api.dependencies.auth import get_current_user
 from app.models.user import User
@@ -13,9 +19,11 @@ from app.schemas.information import (
     DocumentUploadResponse,
     SearchRequest,
     SearchResponse,
+    SourceCitation,
 )
 from app.services.ai.gateway import AIGateway
 from app.services.rag.pipeline import RAGPipeline
+
 
 router = APIRouter(
     prefix="/information",
@@ -47,8 +55,13 @@ async def upload_document(
         delete=False,
         suffix=Path(filename).suffix,
     ) as temporary_file:
-        shutil.copyfileobj(file.file, temporary_file)
-        temporary_path = Path(temporary_file.name)
+        shutil.copyfileobj(
+            file.file,
+            temporary_file,
+        )
+        temporary_path = Path(
+            temporary_file.name
+        )
 
     try:
         chunks_created = rag_pipeline.ingest(
@@ -57,7 +70,9 @@ async def upload_document(
             filename=filename,
         )
     finally:
-        temporary_path.unlink(missing_ok=True)
+        temporary_path.unlink(
+            missing_ok=True
+        )
 
     return DocumentUploadResponse(
         document_id=document_id,
@@ -66,7 +81,10 @@ async def upload_document(
     )
 
 
-@router.post("/search", response_model=SearchResponse)
+@router.post(
+    "/search",
+    response_model=SearchResponse,
+)
 async def semantic_search(
     payload: SearchRequest,
     current_user: User = Depends(get_current_user),
@@ -82,7 +100,10 @@ async def semantic_search(
     )
 
 
-@router.post("/ask", response_model=AskResponse)
+@router.post(
+    "/ask",
+    response_model=AskResponse,
+)
 async def ask_information(
     payload: AskRequest,
     current_user: User = Depends(get_current_user),
@@ -98,21 +119,38 @@ async def ask_information(
             detail="No relevant information found",
         )
 
+    context_parts = []
+
+    for index, source in enumerate(
+        sources,
+        start=1,
+    ):
+        metadata = source["metadata"]
+
+        context_parts.append(
+            f"[{index}] "
+            f"File: {metadata.get('filename', 'unknown')}, "
+            f"Chunk: {metadata.get('chunk_index', 0)}\n"
+            f"{source['content']}"
+        )
+
     context = "\n\n".join(
-        f"[Source {index + 1}]\n{source['content']}"
-        for index, source in enumerate(sources)
+        context_parts
     )
 
     prompt = f"""
-Answer the question using only the provided context.
+Answer the question using only the retrieved context below.
 
-If the answer cannot be determined from the context, say that the
-available documents do not contain enough information.
+Cite factual claims using the corresponding source number,
+for example [1] or [2].
 
-Context:
+If the retrieved context does not contain enough information,
+state that clearly. Do not invent sources.
+
+RETRIEVED CONTEXT:
 {context}
 
-Question:
+QUESTION:
 {payload.question}
 """
 
@@ -122,12 +160,29 @@ Question:
         prompt=prompt,
         system_instruction=(
             "You are Sagesai's enterprise information assistant. "
-            "Provide accurate, grounded answers based only on retrieved context."
+            "Answer only from retrieved evidence and cite sources "
+            "using bracketed source numbers."
         ),
     )
+
+    citations = [
+        SourceCitation(
+            citation_id=index,
+            document_id=source["metadata"]["document_id"],
+            filename=source["metadata"]["filename"],
+            chunk_index=source["metadata"]["chunk_index"],
+            score=source["score"],
+            rerank_score=source["rerank_score"],
+        )
+        for index, source in enumerate(
+            sources,
+            start=1,
+        )
+    ]
 
     return AskResponse(
         question=payload.question,
         answer=answer,
         sources=sources,
+        citations=citations,
     )

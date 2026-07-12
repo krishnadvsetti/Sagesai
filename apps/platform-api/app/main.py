@@ -1,10 +1,12 @@
-from contextlib import asynccontextmanager
 from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from prometheus_client import make_asgi_app
 
 from app.api.v1.router import api_router
 from app.core.config.settings import settings
+from app.observability import PrometheusMiddleware
 
 
 @asynccontextmanager
@@ -22,10 +24,17 @@ app = FastAPI(
     openapi_url="/openapi.json",
 )
 
+app.add_middleware(
+    PrometheusMiddleware,
+)
+
 app.include_router(
     api_router,
     prefix=settings.API_V1_PREFIX,
 )
+
+metrics_app = make_asgi_app()
+app.mount("/metrics", metrics_app)
 
 
 @app.get("/", tags=["Platform"])
