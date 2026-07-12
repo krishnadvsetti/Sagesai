@@ -3,10 +3,28 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from prometheus_client import make_asgi_app
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
+from starlette.middleware.cors import CORSMiddleware
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from app.api.v1.router import api_router
 from app.core.config.settings import settings
-from app.observability import PrometheusMiddleware
+from app.core.exceptions import register_exception_handlers
+from app.core.security import (
+    RequestSizeLimitMiddleware,
+    SecurityHeadersMiddleware,
+    limiter,
+)
+from app.observability import (
+    PrometheusMiddleware,
+    RequestLoggingMiddleware,
+    configure_logging,
+)
+
+
+configure_logging()
 
 
 @asynccontextmanager
@@ -24,9 +42,37 @@ app = FastAPI(
     openapi_url="/openapi.json",
 )
 
-app.add_middleware(
-    PrometheusMiddleware,
+register_exception_handlers(app)
+
+app.state.limiter = limiter
+
+app.add_exception_handler(
+    RateLimitExceeded,
+    _rate_limit_exceeded_handler,
 )
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origins_list,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.add_middleware(
+    TrustedHostMiddleware,
+    allowed_hosts=settings.trusted_hosts_list,
+)
+
+app.add_middleware(
+    RequestSizeLimitMiddleware,
+    max_request_size=settings.MAX_REQUEST_SIZE_BYTES,
+)
+
+app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(SlowAPIMiddleware)
+app.add_middleware(PrometheusMiddleware)
+app.add_middleware(RequestLoggingMiddleware)
 
 app.include_router(
     api_router,

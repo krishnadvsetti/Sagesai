@@ -17,6 +17,39 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 8000
 
+        # Security
+    CORS_ORIGINS: str = (
+        "http://localhost:3000,"
+        "http://127.0.0.1:3000"
+    )
+    TRUSTED_HOSTS: str = (
+        "localhost,"
+        "127.0.0.1,"
+        "testserver"
+    )
+    MAX_REQUEST_SIZE_MB: int = 10
+    RATE_LIMIT: str = "100/minute"
+
+    @property
+    def cors_origins_list(self) -> list[str]:
+        return [
+            origin.strip()
+            for origin in self.CORS_ORIGINS.split(",")
+            if origin.strip()
+        ]
+
+    @property
+    def trusted_hosts_list(self) -> list[str]:
+        return [
+            host.strip()
+            for host in self.TRUSTED_HOSTS.split(",")
+            if host.strip()
+        ]
+
+    @property
+    def MAX_REQUEST_SIZE_BYTES(self) -> int:
+        return self.MAX_REQUEST_SIZE_MB * 1024 * 1024
+
     DATABASE_HOST: str = "localhost"
     DATABASE_PORT: int = 5432
     DATABASE_NAME: str = "sagesai"

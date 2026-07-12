@@ -1,0 +1,179 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "graphTooltip": 1,
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Total HTTP Requests",
+      "id": 1,
+      "gridPos": {"h": 5, "w": 6, "x": 0, "y": 0},
+      "targets": [
+        {
+          "expr": "sum(sagesai_http_requests_total)",
+          "legendFormat": "Requests",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "HTTP 5xx Errors",
+      "id": 2,
+      "gridPos": {"h": 5, "w": 6, "x": 6, "y": 0},
+      "targets": [
+        {
+          "expr": "sum(sagesai_http_requests_total{status_code=~\"5..\"})",
+          "legendFormat": "Errors",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "AI Requests",
+      "id": 3,
+      "gridPos": {"h": 5, "w": 6, "x": 12, "y": 0},
+      "targets": [
+        {
+          "expr": "sum(sagesai_ai_requests_total)",
+          "legendFormat": "AI Requests",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Guardrail Blocks",
+      "id": 4,
+      "gridPos": {"h": 5, "w": 6, "x": 18, "y": 0},
+      "targets": [
+        {
+          "expr": "sum(sagesai_guardrail_blocks_total)",
+          "legendFormat": "Blocked",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "HTTP Request Rate",
+      "id": 5,
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 5},
+      "targets": [
+        {
+          "expr": "sum by (method, path) (rate(sagesai_http_requests_total[5m]))",
+          "legendFormat": "{{method}} {{path}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "API p95 Latency",
+      "id": 6,
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 5},
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, path) (rate(sagesai_http_request_duration_seconds_bucket[5m])))",
+          "legendFormat": "{{path}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "AI Requests by Status",
+      "id": 7,
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 13},
+      "targets": [
+        {
+          "expr": "sum by (provider, status) (rate(sagesai_ai_requests_total[5m]))",
+          "legendFormat": "{{provider}} - {{status}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "AI p95 Latency",
+      "id": 8,
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 13},
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, provider) (rate(sagesai_ai_request_duration_seconds_bucket[5m])))",
+          "legendFormat": "{{provider}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "AI Provider Failures",
+      "id": 9,
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 21},
+      "targets": [
+        {
+          "expr": "sum by (provider) (rate(sagesai_ai_provider_failures_total[5m]))",
+          "legendFormat": "{{provider}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "ML Inference Rate",
+      "id": 10,
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 21},
+      "targets": [
+        {
+          "expr": "sum by (model, prediction, status) (rate(sagesai_ml_inferences_total[5m]))",
+          "legendFormat": "{{model}} {{prediction}} {{status}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "ML p95 Inference Latency",
+      "id": 11,
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 21},
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, model) (rate(sagesai_ml_inference_duration_seconds_bucket[5m])))",
+          "legendFormat": "{{model}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "ML Prediction Confidence",
+      "id": 12,
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 29},
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum by (le, model, prediction) (rate(sagesai_ml_prediction_confidence_bucket[5m])))",
+          "legendFormat": "{{model}} - {{prediction}}",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "refresh": "15s",
+  "schemaVersion": 41,
+  "tags": ["sagesai", "observability", "ai", "ml"],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "title": "Sagesai Platform Observability",
+  "uid": "sagesai-observability",
+  "version": 1
+}

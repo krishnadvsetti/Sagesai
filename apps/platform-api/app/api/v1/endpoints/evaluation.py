@@ -8,8 +8,6 @@ from app.schemas.evaluation import (
 )
 from app.services.evaluation.rag_evaluator import RAGEvaluator
 from app.schemas.evaluation import (
-    RAGEvaluationRequest,
-    RAGEvaluationResponse,
     RAGEvaluationSuiteResponse,
 )
 from app.services.evaluation.runner import RAGEvaluationRunner

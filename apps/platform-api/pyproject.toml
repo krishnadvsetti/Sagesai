@@ -27,6 +27,7 @@ dependencies = [
     "python-multipart>=0.0.32",
     "scikit-learn>=1.9.0",
     "sentence-transformers>=5.6.0",
+    "slowapi>=0.1.10",
     "sqlalchemy>=2.0.51",
     "structlog>=26.1.0",
     "tensorflow>=2.21.0",
