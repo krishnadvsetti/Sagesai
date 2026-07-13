@@ -54,9 +54,9 @@ class Settings(BaseSettings):
     DATABASE_PORT: int = 5432
     DATABASE_NAME: str = "sagesai"
     DATABASE_USER: str = "sagesai"
-    DATABASE_PASSWORD: str = "sagesai_dev_password"
+    DATABASE_PASSWORD: str = "change-me"
 
-    SECRET_KEY: str = "change-this-in-production"
+    SECRET_KEY: str = "replace-with-a-secure-random-secret"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 

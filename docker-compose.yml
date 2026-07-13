@@ -11,8 +11,8 @@ services:
       DATABASE_PORT: 5432
       DATABASE_NAME: sagesai
       DATABASE_USER: sagesai
-      DATABASE_PASSWORD: sagesai_dev_password
-      SECRET_KEY: ${SECRET_KEY:-change-this-before-production}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      SECRET_KEY: ${SECRET_KEY}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       ANOMALY_SERVICE_URL: http://anomaly-service:8001
     ports:
@@ -49,7 +49,7 @@ services:
     environment:
       POSTGRES_DB: sagesai
       POSTGRES_USER: sagesai
-      POSTGRES_PASSWORD: sagesai_dev_password
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
