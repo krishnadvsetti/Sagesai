@@ -1,9 +1,3 @@
-Use this to **replace the incomplete README with a complete, concise recruiter-facing version**. No dependencies need to be installed.
-
-````bash
-cd /workspaces/sagesai
-
-cat > README.md <<'EOF'
 # Sagesai
 
 ## Enterprise AI Platform
@@ -40,7 +34,7 @@ The project demonstrates how AI capabilities can be engineered as integrated, pr
 
 ## Architecture
 
-```text
+
                          ┌──────────────────────────┐
                          │      API Consumers       │
                          │ Web / Mobile / Services  │
@@ -89,7 +83,7 @@ The project demonstrates how AI capabilities can be engineered as integrated, pr
         │ Observability Stack   │
         │ Prometheus + Grafana  │
         └───────────────────────┘
-````
+
 
 ---
 
