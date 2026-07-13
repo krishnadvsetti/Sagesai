@@ -13,7 +13,14 @@ router = APIRouter(
     tags=["Computer Vision"],
 )
 
-classifier = DocumentQualityClassifier()
+classifier: DocumentQualityClassifier | None = None
+
+
+def get_classifier() -> DocumentQualityClassifier:
+    global classifier
+    if classifier is None:
+        classifier = DocumentQualityClassifier()
+    return classifier
 
 
 @router.post("/document-quality")
@@ -31,7 +38,7 @@ async def analyze_document_quality(
 
     try:
         image = Image.open(BytesIO(contents))
-        result = classifier.predict(image)
+        result = get_classifier().predict(image)
     except UnidentifiedImageError as exc:
         raise HTTPException(
             status_code=400,
