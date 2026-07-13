@@ -73,19 +73,20 @@ def test_document_quality_endpoint(
     authenticate_as_analyst,
     monkeypatch,
 ):
+    mock_classifier = Mock()
+    mock_classifier.predict.return_value = {
+        "quality": "good",
+        "confidence": 0.95,
+        "probabilities": {
+            "good": 0.95,
+            "poor": 0.05,
+        },
+    }
+
     monkeypatch.setattr(
-        vision_endpoint.classifier,
-        "predict",
-        Mock(
-            return_value={
-                "quality": "good",
-                "confidence": 0.95,
-                "probabilities": {
-                    "good": 0.95,
-                    "poor": 0.05,
-                },
-            }
-        ),
+        vision_endpoint,
+        "get_classifier",
+        lambda: mock_classifier,
     )
 
     image = create_test_image()

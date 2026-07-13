@@ -26,7 +26,14 @@ router = APIRouter(
     tags=["AI Memory"],
 )
 
-memory_service = MemoryService()
+memory_service: MemoryService | None = None
+
+
+def get_memory_service() -> MemoryService:
+    global memory_service
+    if memory_service is None:
+        memory_service = MemoryService()
+    return memory_service
 
 
 @router.post(
@@ -39,7 +46,7 @@ async def create_conversation(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> ConversationResponse:
-    session = await memory_service.create_session(
+    session = await get_memory_service().create_session(
         db=db,
         user_id=current_user.id,
         title=payload.title,
@@ -57,7 +64,7 @@ async def get_conversation_history(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> list[MemoryMessageResponse]:
-    session = await memory_service.get_user_session(
+    session = await get_memory_service().get_user_session(
         db=db,
         session_id=session_id,
         user_id=current_user.id,
@@ -69,7 +76,7 @@ async def get_conversation_history(
             detail="Conversation session not found",
         )
 
-    history = await memory_service.get_history(
+    history = await get_memory_service().get_history(
         db=db,
         session_id=session_id,
     )
@@ -91,7 +98,7 @@ async def chat_with_memory(
     current_user: User = Depends(get_current_user),
 ) -> ConversationChatResponse:
     try:
-        result = await memory_service.chat(
+        result = await get_memory_service().chat(
             db=db,
             session_id=session_id,
             user_id=current_user.id,

@@ -18,7 +18,14 @@ router = APIRouter(
     tags=["LLM & RAG Evaluation"],
 )
 
-evaluator = RAGEvaluator()
+evaluator: RAGEvaluator | None = None
+
+
+def get_evaluator() -> RAGEvaluator:
+    global evaluator
+    if evaluator is None:
+        evaluator = RAGEvaluator()
+    return evaluator
 
 
 @router.post(
@@ -30,7 +37,7 @@ async def evaluate_rag_response(
     current_user: User = Depends(get_current_user),
 ) -> RAGEvaluationResponse:
     try:
-        result = await evaluator.evaluate(
+        result = await get_evaluator().evaluate(
             question=payload.question,
             answer=payload.answer,
             contexts=payload.contexts,
@@ -44,7 +51,14 @@ async def evaluate_rag_response(
             detail="The evaluation model returned an invalid response.",
         ) from exc
 
-runner = RAGEvaluationRunner()
+runner: RAGEvaluationRunner | None = None
+
+
+def get_runner() -> RAGEvaluationRunner:
+    global runner
+    if runner is None:
+        runner = RAGEvaluationRunner()
+    return runner
 
 
 @router.post(
@@ -54,6 +68,6 @@ runner = RAGEvaluationRunner()
 async def run_rag_evaluation_suite(
     current_user: User = Depends(get_current_user),
 ) -> RAGEvaluationSuiteResponse:
-    result = await runner.run()
+    result = await get_runner().run()
 
     return RAGEvaluationSuiteResponse(**result)

@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 from types import SimpleNamespace
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, Mock
 import uuid
 
 from app.api.v1.endpoints import memory as memory_endpoint
@@ -22,10 +22,13 @@ def test_create_memory_session(
 
     mock_create = AsyncMock(return_value=mock_session)
 
+    mock_service = Mock()
+    mock_service.create_session = mock_create
+
     monkeypatch.setattr(
-        memory_endpoint.memory_service,
-        "create_session",
-        mock_create,
+        memory_endpoint,
+        "get_memory_service",
+        lambda: mock_service,
     )
 
     response = client.post(
@@ -49,10 +52,13 @@ def test_memory_history_not_found(
     authenticate_as_analyst,
     monkeypatch,
 ):
+    mock_service = Mock()
+    mock_service.get_user_session = AsyncMock(return_value=None)
+
     monkeypatch.setattr(
-        memory_endpoint.memory_service,
-        "get_user_session",
-        AsyncMock(return_value=None),
+        memory_endpoint,
+        "get_memory_service",
+        lambda: mock_service,
     )
 
     response = client.get(
