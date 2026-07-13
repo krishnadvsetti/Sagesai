@@ -34,6 +34,8 @@ The project demonstrates how AI capabilities can be engineered as integrated, pr
 
 ## Architecture
 
+```text
+
 
                          ┌──────────────────────────┐
                          │      API Consumers       │
@@ -84,7 +86,7 @@ The project demonstrates how AI capabilities can be engineered as integrated, pr
         │ Prometheus + Grafana  │
         └───────────────────────┘
 
-
+```
 ---
 
 ## Core Capabilities
