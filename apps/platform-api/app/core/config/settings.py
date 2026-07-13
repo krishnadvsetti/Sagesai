@@ -66,6 +66,9 @@ class Settings(BaseSettings):
     AI_TEMPERATURE: float = 0.2
     AI_MAX_OUTPUT_TOKENS: int = 2048
 
+    # Internal services
+    ANOMALY_SERVICE_URL: str = "http://127.0.0.1:8001"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

@@ -4,9 +4,17 @@ import joblib
 import numpy as np
 import torch
 
-from app.ml.anomaly.data.generate import FEATURES
-from app.ml.anomaly.models.autoencoder import AnomalyAutoencoder
+from app.models.autoencoder import AnomalyAutoencoder
 
+
+FEATURES = [
+    "failed_logins",
+    "login_hour",
+    "request_rate",
+    "unique_ips",
+    "privilege_actions",
+    "data_transfer_mb",
+]
 
 ARTIFACT_DIR = Path(__file__).parent / "artifacts"
 

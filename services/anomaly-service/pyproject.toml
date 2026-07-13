@@ -1,0 +1,20 @@
+[project]
+name = "sagesai-anomaly-service"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.139.0",
+    "joblib>=1.5.3",
+    "numpy>=2.5.1",
+    "scikit-learn>=1.9.0",
+    "torch>=2.13.0",
+    "uvicorn[standard]>=0.51.0",
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }

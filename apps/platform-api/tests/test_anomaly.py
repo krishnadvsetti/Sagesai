@@ -1,29 +1,13 @@
-from unittest.mock import Mock
+from unittest.mock import AsyncMock
 
-import numpy as np
+import httpx
 import pytest
-import torch
-from torch import nn
 
 from app.api.v1.endpoints import soc as soc_endpoint
-from app.ml.anomaly.data.generate import FEATURES
-from app.ml.anomaly.inference import AnomalyDetector
-
-
-class ZeroReconstructionModel(nn.Module):
-    def forward(self, inputs: torch.Tensor) -> torch.Tensor:
-        return torch.zeros_like(inputs)
-
-
-def build_detector(threshold: float = 0.5) -> AnomalyDetector:
-    detector = AnomalyDetector.__new__(AnomalyDetector)
-
-    detector.threshold = threshold
-    detector.scaler = Mock()
-    detector.scaler.transform.side_effect = lambda values: values
-    detector.model = ZeroReconstructionModel()
-
-    return detector
+from app.services.anomaly.client import (
+    AnomalyServiceClient,
+    AnomalyServiceError,
+)
 
 
 def valid_features() -> dict[str, float]:
@@ -37,31 +21,62 @@ def valid_features() -> dict[str, float]:
     }
 
 
-def test_anomaly_detector_returns_expected_result():
-    detector = build_detector(threshold=0.5)
+@pytest.mark.asyncio
+async def test_anomaly_service_client_returns_prediction(monkeypatch):
+    expected = {
+        "is_anomaly": True,
+        "anomaly_score": 0.92,
+        "threshold": 0.5,
+    }
 
-    result = detector.predict(valid_features())
-
-    expected_values = np.array(
-        [[valid_features()[name] for name in FEATURES]],
-        dtype=np.float32,
+    response = httpx.Response(
+        200,
+        json=expected,
+        request=httpx.Request(
+            "POST",
+            "http://anomaly-service:8001/predict",
+        ),
     )
 
-    expected_score = float(np.mean(expected_values**2))
+    request_mock = AsyncMock(return_value=response)
 
-    assert result["anomaly_score"] == pytest.approx(
-        expected_score
+    monkeypatch.setattr(
+        httpx.AsyncClient,
+        "post",
+        request_mock,
     )
-    assert result["threshold"] == 0.5
-    assert result["is_anomaly"] is True
+
+    client = AnomalyServiceClient()
+    result = await client.predict(valid_features())
+
+    assert result == expected
 
 
-def test_anomaly_detector_marks_normal_event():
-    detector = build_detector(threshold=1000.0)
+@pytest.mark.asyncio
+async def test_anomaly_service_client_handles_failure(monkeypatch):
+    request_mock = AsyncMock(
+        side_effect=httpx.ConnectError(
+            "Connection failed",
+            request=httpx.Request(
+                "POST",
+                "http://anomaly-service:8001/predict",
+            ),
+        )
+    )
 
-    result = detector.predict(valid_features())
+    monkeypatch.setattr(
+        httpx.AsyncClient,
+        "post",
+        request_mock,
+    )
 
-    assert result["is_anomaly"] is False
+    client = AnomalyServiceClient()
+
+    with pytest.raises(
+        AnomalyServiceError,
+        match="Anomaly detection service is unavailable",
+    ):
+        await client.predict(valid_features())
 
 
 def test_detect_anomaly_endpoint(
@@ -70,9 +85,9 @@ def test_detect_anomaly_endpoint(
     monkeypatch,
 ):
     monkeypatch.setattr(
-        soc_endpoint.anomaly_detector,
+        soc_endpoint.anomaly_client,
         "predict",
-        Mock(
+        AsyncMock(
             return_value={
                 "is_anomaly": True,
                 "anomaly_score": 0.92,

@@ -1,4 +1,47 @@
 services:
+  platform-api:
+    build:
+      context: ./apps/platform-api
+      dockerfile: Dockerfile
+    container_name: sagesai-platform-api
+    restart: unless-stopped
+    environment:
+      ENVIRONMENT: production
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: sagesai
+      DATABASE_USER: sagesai
+      DATABASE_PASSWORD: sagesai_dev_password
+      SECRET_KEY: ${SECRET_KEY:-change-this-before-production}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      ANOMALY_SERVICE_URL: http://anomaly-service:8001
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      anomaly-service:
+        condition: service_healthy
+
+  anomaly-service:
+    build:
+      context: ./services/anomaly-service
+      dockerfile: Dockerfile
+    container_name: sagesai-anomaly-service
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
   postgres:
     image: postgres:16-alpine
     container_name: sagesai-postgres

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from app.api.dependencies.auth import require_roles
-from app.ml.anomaly.inference import AnomalyDetector
+from app.services.anomaly import AnomalyServiceClient
 from app.models.user import User, UserRole
 from app.schemas.soc import (
     AnomalyDetectionRequest,
@@ -17,7 +17,7 @@ router = APIRouter(
     tags=["SOC Cybersecurity Analyst"],
 )
 
-anomaly_detector = AnomalyDetector()
+anomaly_client = AnomalyServiceClient()
 
 
 @router.post(
@@ -52,6 +52,6 @@ async def detect_anomaly(
         )
     ),
 ) -> AnomalyDetectionResponse:
-    result = anomaly_detector.predict(payload.model_dump())
+    result = await anomaly_client.predict(payload.model_dump())
 
     return AnomalyDetectionResponse(**result)
